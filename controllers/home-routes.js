@@ -3,8 +3,13 @@ const sequelize = require('../config/connection');
 const { Post, User, Comment } = require('../models');
 
 router.get('/', (req, res) => {
-  console.log('======================');
   Post.findAll({
+    attributes: [
+      'id',
+      'title',
+      'created_at',
+      'content'
+    ],
     include: [
       {
         model: Comment,
@@ -22,11 +27,7 @@ router.get('/', (req, res) => {
   })
     .then(dbPostData => {
       const posts = dbPostData.map(post => post.get({ plain: true }));
-
-      res.render('homepage', {
-        posts,
-        loggedIn: req.session.loggedIn
-      });
+      res.render('homepage', { posts, loggedIn: req.session.loggedIn });
     })
     .catch(err => {
       console.log(err);
@@ -41,9 +42,9 @@ router.get('/post/:id', (req, res) => {
     },
     attributes: [
       'id',
-      'post_url',
       'title',
       'created_at',
+      'content'
     ],
     include: [
       {
@@ -65,13 +66,8 @@ router.get('/post/:id', (req, res) => {
         res.status(404).json({ message: 'No post found with this id' });
         return;
       }
-
       const post = dbPostData.get({ plain: true });
-
-      res.render('single-post', {
-        post,
-        loggedIn: req.session.loggedIn
-      });
+      res.render('single-post', { post, loggedIn: req.session.loggedIn });
     })
     .catch(err => {
       console.log(err);
@@ -84,8 +80,15 @@ router.get('/login', (req, res) => {
     res.redirect('/');
     return;
   }
-
   res.render('login');
 });
+
+router.get('signup', (req, res) => {
+  if (req.session.length) {
+    res.redirect('/');
+    return;
+  }
+  res.render('singup');
+})
 
 module.exports = router;
